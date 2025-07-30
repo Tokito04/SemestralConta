@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero - Devtionary</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #f8fafc; /* slate-50 */
+        }
+        .card {
+            background-color: #1e293b; /* slate-800 */
+            border: 1px solid #334155; /* slate-700 */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #38bdf8; /* sky-500 */
+            color: #0f172a; /* slate-900 */
+        }
+        .details-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .details-section.open {
+            max-height: 1000px; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- HEADER -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-400"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-100">Devtionary</h1>
+            </div>
+            <div class="text-right">
+                <h2 class="text-lg md:text-xl font-semibold text-slate-300">Dashboard Financiero</h2>
+                <p class="text-sm text-slate-400">Semestre al 30 de Junio, 2025</p>
+            </div>
+        </header>
+
+        <!-- KPIS -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Ingresos Totales -->
+            <div class="card">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-slate-400 font-medium">Ingresos Totales</h3>
+                    <i data-lucide="dollar-sign" class="text-green-500"></i>
+                </div>
+                <p class="text-3xl font-bold mt-2 text-slate-50">$7,000.00</p>
+                <p class="text-sm text-green-500 mt-1">+100% vs. periodo anterior (ej.)</p>
+            </div>
+            <!-- Utilidad Neta -->
+            <div class="card">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-slate-400 font-medium">Utilidad Neta</h3>
+                    <i data-lucide="trending-up" class="text-sky-500"></i>
+                </div>
+                <p class="text-3xl font-bold mt-2 text-slate-50">$1,416.00</p>
+                <p class="text-sm text-slate-400 mt-1">Después de impuestos</p>
+            </div>
+            <!-- Total Activos -->
+            <div class="card">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-slate-400 font-medium">Total Activos</h3>
+                    <i data-lucide="landmark" class="text-amber-500"></i>
+                </div>
+                <p class="text-3xl font-bold mt-2 text-slate-50">$7,613.00</p>
+                <p class="text-sm text-slate-400 mt-1">Posición financiera sólida</p>
+            </div>
+            <!-- Margen de Utilidad -->
+            <div class="card">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-slate-400 font-medium">Margen de Utilidad</h3>
+                    <i data-lucide="pie-chart" class="text-violet-500"></i>
+                </div>
+                <p class="text-3xl font-bold mt-2 text-slate-50">20.23%</p>
+                <p class="text-sm text-slate-400 mt-1">Eficiencia operativa</p>
+            </div>
+        </section>
+
+        <!-- CHARTS -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Estado de Resultados -->
+            <div class="card">
+                <h3 class="text-xl font-semibold mb-4 text-slate-200">Estado de Resultados</h3>
+                <div class="w-full h-64 md:h-72 mb-4 flex justify-center items-center">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between p-2 rounded-md bg-slate-700/50"><span>Ingresos</span> <span class="font-semibold text-green-400">$7,000.00</span></div>
+                    <div class="flex justify-between p-2"><span>(-) Gastos Operativos</span> <span class="font-semibold text-red-400">$5,584.00</span></div>
+                    <div class="flex justify-between p-2"><span>(-) Impuestos</span> <span class="font-semibold text-red-400">$472.00</span></div>
+                    <div class="flex justify-between p-2 rounded-md bg-slate-700/50 border-t-2 border-sky-500">
+                        <span class="font-bold">Utilidad Neta</span>
+                        <span class="font-bold text-sky-400">$1,416.00</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Balance General -->
+            <div class="card">
+                <h3 class="text-xl font-semibold mb-4 text-slate-200">Balance General</h3>
+                <div class="w-full h-64 md:h-72 mb-4">
+                    <canvas id="balanceChart"></canvas>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between p-2 rounded-md bg-slate-700/50"><span>Total Activos</span> <span class="font-semibold text-amber-400">$7,613.00</span></div>
+                    <div class="flex justify-between p-2"><span>Total Pasivos</span> <span class="font-semibold text-orange-400">$1,797.00</span></div>
+                    <div class="flex justify-between p-2"><span>Total Patrimonio</span> <span class="font-semibold text-violet-400">$5,816.00</span></div>
+                    <div class="flex justify-between p-2 rounded-md bg-slate-700/50 border-t-2 border-green-500">
+                        <span class="font-bold">Pasivo + Patrimonio</span>
+                        <span class="font-bold text-green-400">$7,613.00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DETAILED TABLES -->
+        <section class="card">
+            <button id="details-toggle" class="w-full text-left flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-slate-200">Ver Detalles y Transacciones</h3>
+                <i id="details-arrow" data-lucide="chevron-down" class="transition-transform"></i>
+            </button>
+            <div id="details-content" class="details-section mt-4">
+                <!-- TABS -->
+                <div class="border-b border-slate-700 mb-4">
+                    <nav class="flex space-x-2" aria-label="Tabs">
+                        <button class="tab-button active py-2 px-4 font-medium rounded-t-lg" data-tab="balance-prueba">Balance de Prueba</button>
+                        <button class="tab-button py-2 px-4 font-medium rounded-t-lg" data-tab="libro-diario">Libro Diario</button>
+                    </nav>
+                </div>
+
+                <!-- TAB CONTENT -->
+                <div id="tab-content">
+                    <!-- Balance de Prueba -->
+                    <div id="balance-prueba" class="tab-panel">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-slate-400 uppercase bg-slate-700">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 rounded-l-lg">Cuenta</th>
+                                        <th scope="col" class="px-6 py-3 text-right">Débito</th>
+                                        <th scope="col" class="px-6 py-3 text-right rounded-r-lg">Crédito</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be injected by JS -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="font-semibold text-slate-50 bg-slate-700">
+                                        <td class="px-6 py-3 text-base rounded-l-lg">Total</td>
+                                        <td id="total-debit" class="px-6 py-3 text-right text-base"></td>
+                                        <td id="total-credit" class="px-6 py-3 text-right text-base rounded-r-lg"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Libro Diario -->
+                    <div id="libro-diario" class="tab-panel hidden">
+                         <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-slate-400 uppercase bg-slate-700">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 rounded-l-lg">Fecha</th>
+                                        <th scope="col" class="px-6 py-3">Descripción</th>
+                                        <th scope="col" class="px-6 py-3 text-right">Débito</th>
+                                        <th scope="col" class="px-6 py-3 text-right rounded-r-lg">Crédito</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center mt-8 text-slate-500 text-sm">
+            <p>&copy; 2025 Devtionary Financial Showcase. Generado para facilitar la presentación de datos.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DATA FROM EXCEL ---
+        const balancePruebaData = [
+            { cuenta: 'Banco', debito: 2888, credito: 0 },
+            { cuenta: 'Equipo de Oficina', debito: 4500, credito: 0 },
+            { cuenta: 'Licencias (Intangibles)', debito: 225, credito: 0 },
+            { cuenta: 'Cuentas por Pagar', debito: 0, credito: 1325 },
+            { cuenta: 'Impuesto por Pagar', debito: 0, credito: 472 },
+            { cuenta: 'Capital Social', debito: 0, credito: 4400 }, // 3400 + 1000
+            { cuenta: 'Utilidad Retenida', debito: 0, credito: 1000 },
+            { cuenta: 'Ingresos', debito: 0, credito: 7000 },
+            { cuenta: 'Gasto de Internet', debito: 37, credito: 0 },
+            { cuenta: 'Gasto de Luz', debito: 55, credito: 0 },
+            { cuenta: 'Gasto de Base de Datos', debito: 120, credito: 0 },
+            { cuenta: 'Gasto de API', debito: 20, credito: 0 },
+            { cuenta: 'Gasto de Publicidad', debito: 200, credito: 0 },
+            { cuenta: 'Honorarios Profesionales', debito: 4680, credito: 0 },
+            { cuenta: 'Gasto por Impuesto', debito: 472, credito: 0 },
+        ];
+
+        const libroDiarioData = [
+            { fecha: '01/01/2025', desc: 'Banco', debito: 1000, credito: 0 },
+            { fecha: '01/01/2025', desc: 'Capital Social', debito: 0, credito: 1000 },
+            { fecha: '01/01/2025', desc: 'Equipo de Oficina', debito: 4500, credito: 0 },
+            { fecha: '01/01/2025', desc: 'Licencias (Intangibles)', debito: 225, credito: 0 },
+            { fecha: '01/01/2025', desc: 'Capital Social', debito: 0, credito: 3400 },
+            { fecha: '01/01/2025', desc: 'Cuentas por Pagar', debito: 0, credito: 1325 },
+            { fecha: '01/01/2025', desc: 'Utilidad Retenida', debito: 1000, credito: 0 },
+            { fecha: '01/01/2025', desc: 'Capital Social', debito: 0, credito: 1000 },
+            { fecha: '02/01/2025', desc: 'Banco', debito: 7000, credito: 0 },
+            { fecha: '02/01/2025', desc: 'Ingresos', debito: 0, credito: 7000 },
+            { fecha: '03/01/2025', desc: 'Gastos Varios (Operativos)', debito: 5112, credito: 0 },
+            { fecha: '03/01/2025', desc: 'Bancos', debito: 0, credito: 5112 },
+            { fecha: '04/01/2025', desc: 'Gasto por Impuesto', debito: 472, credito: 0 },
+            { fecha: '04/01/2025', desc: 'Impuesto por Pagar', debito: 0, credito: 472 },
+        ];
+
+
+        // --- UTILITY FUNCTIONS ---
+        const formatCurrency = (value) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+        // --- CHART.JS SETUP ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Global Chart Config
+            Chart.defaults.color = '#94a3b8'; // slate-400
+            Chart.defaults.font.family = "'Inter', sans-serif";
+
+            // 1. Expenses Chart (Doughnut)
+            const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+            const expensesData = {
+                labels: ['Honorarios', 'Publicidad', 'Base de Datos', 'Luz', 'Internet', 'API'],
+                datasets: [{
+                    label: 'Distribución de Gastos',
+                    data: [4680, 200, 120, 55, 37, 20],
+                    backgroundColor: [
+                        '#38bdf8', // sky-500
+                        '#6366f1', // indigo-500
+                        '#a855f7', // purple-500
+                        '#ec4899', // pink-500
+                        '#f59e0b', // amber-500
+                        '#84cc16'  // lime-500
+                    ],
+                    borderColor: '#1e293b', // slate-800
+                    hoverOffset: 4
+                }]
+            };
+            new Chart(expensesCtx, {
+                type: 'doughnut',
+                data: expensesData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                boxWidth: 12,
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Balance Sheet Chart (Bar)
+            const balanceCtx = document.getElementById('balanceChart').getContext('2d');
+            const balanceData = {
+                labels: ['Posición Financiera'],
+                datasets: [
+                    {
+                        label: 'Activos',
+                        data: [7613],
+                        backgroundColor: '#f59e0b', // amber-500
+                        borderColor: '#b45309',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Pasivos',
+                        data: [1797],
+                        backgroundColor: '#f97316', // orange-500
+                        borderColor: '#c2410c',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Patrimonio',
+                        data: [5816],
+                        backgroundColor: '#a855f7', // violet-500
+                        borderColor: '#7e22ce',
+                        borderWidth: 1
+                    }
+                ]
+            };
+            new Chart(balanceCtx, {
+                type: 'bar',
+                data: balanceData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#334155' // slate-700
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        },
+                        x: {
+                             grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // --- DYNAMIC CONTENT INJECTION ---
+            
+            // Populate Balance de Prueba Table
+            const balanceTbody = document.querySelector('#balance-prueba tbody');
+            let totalDebit = 0;
+            let totalCredit = 0;
+            balancePruebaData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-700 hover:bg-slate-700/50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-50 whitespace-nowrap">${item.cuenta}</td>
+                    <td class="px-6 py-4 text-right">${item.debito > 0 ? formatCurrency(item.debito) : ''}</td>
+                    <td class="px-6 py-4 text-right">${item.credito > 0 ? formatCurrency(item.credito) : ''}</td>
+                `;
+                balanceTbody.appendChild(row);
+                totalDebit += item.debito;
+                totalCredit += item.credito;
+            });
+            document.getElementById('total-debit').textContent = formatCurrency(totalDebit);
+            document.getElementById('total-credit').textContent = formatCurrency(totalCredit);
+
+            // Populate Libro Diario Table
+            const diarioTbody = document.querySelector('#libro-diario tbody');
+            libroDiarioData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-700 hover:bg-slate-700/50';
+                row.innerHTML = `
+                    <td class="px-6 py-4">${item.fecha}</td>
+                    <td class="px-6 py-4 font-medium text-slate-50 whitespace-nowrap">${item.desc}</td>
+                    <td class="px-6 py-4 text-right">${item.debito > 0 ? formatCurrency(item.debito) : ''}</td>
+                    <td class="px-6 py-4 text-right">${item.credito > 0 ? formatCurrency(item.credito) : ''}</td>
+                `;
+                diarioTbody.appendChild(row);
+            });
+
+
+            // --- INTERACTIVITY ---
+
+            // Lucide Icons
+            lucide.createIcons();
+
+            // Details Toggle
+            const detailsToggle = document.getElementById('details-toggle');
+            const detailsContent = document.getElementById('details-content');
+            const detailsArrow = document.getElementById('details-arrow');
+            detailsToggle.addEventListener('click', () => {
+                detailsContent.classList.toggle('open');
+                detailsArrow.classList.toggle('rotate-180');
+            });
+
+            // Tabs
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const tabId = button.getAttribute('data-tab');
+                    tabPanels.forEach(panel => {
+                        if (panel.id === tabId) {
+                            panel.classList.remove('hidden');
+                        } else {
+                            panel.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
